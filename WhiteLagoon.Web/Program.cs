@@ -1,7 +1,12 @@
+using Microsoft.EntityFrameworkCore;
+using WhiteLagoon.Infrastructure.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+//in the infrastructure layer, we have added dbContext which parameter was named option; for DB connection configuring from web. and infrastructure will access DB from here...
+builder.Services.AddDbContext<ApplicationDBContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
