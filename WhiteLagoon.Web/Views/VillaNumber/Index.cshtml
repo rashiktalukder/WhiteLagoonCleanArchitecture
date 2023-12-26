@@ -17,7 +17,7 @@
         <table class="table table-bordered table-striped">
             <thead>
                 <tr>
-                    <th>Villa Id</th>
+                    <th>Villa Name</th>
                     <th>Villa Number</th>
                     <th>Special Details</th>
                     <th></th>
@@ -27,9 +27,9 @@
                 @foreach (var obj in Model)
                 {
                     <tr>
-                        <td>@obj.VillaId</td>
+                        <td>@obj.Villa.Name</td>
                         <td class="text-end">@obj.Villa_Number</td>
-                        <td class="text-end">@obj.SpecialDetails</td>
+                        <td class="">@obj.SpecialDetails</td>
                         <td class="text-center">
                             <div class="w-75 btn-group" role="group">
                                 <a asp-controller="VillaNumber" asp-action="Update" asp-route-villaNumberId="@obj.Villa_Number"

@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using WhiteLagoon.Domain.Entities;
 using WhiteLagoon.Infrastructure.Data;
+using WhiteLagoon.Web.ViewModels;
 
 namespace WhiteLagoon.Web.Controllers
 {
@@ -13,85 +16,115 @@ namespace WhiteLagoon.Web.Controllers
         }
         public IActionResult Index()
         {
-            var villaNumbers=_context.VillaNumbers.ToList();
+            var villaNumbers = _context.VillaNumbers.Include(u => u.Villa).ToList();
             return View(villaNumbers);
         }
         public IActionResult Create()
         {
-            return View();
+            VillaNumberVM villaNumberVM = new()
+            {
+                VillaList = _context.Villas.ToList().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                })
+            };
+            return View(villaNumberVM);
         }
 
         [HttpPost]
-        public IActionResult Create(VillaNumber villaNumObj)
+        public IActionResult Create(VillaNumberVM villaNumObj)
         {
+            bool roomNumberExist = _context.VillaNumbers.Any(v => v.Villa_Number == villaNumObj.VillaNumber.Villa_Number);
+
             //ModelState.Remove("Villa"); use this / Villa prop needs to nullable / use [ValidateNever] annotation on Villa Prop.
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && !roomNumberExist)
             {
-                _context.VillaNumbers.Add(villaNumObj);
+                _context.VillaNumbers.Add(villaNumObj.VillaNumber);
                 _context.SaveChanges();
                 TempData["success"] = "The villa Number has been created successfully!";
                 return RedirectToAction("Index");
             }
-            else
+            if (roomNumberExist)
             {
-                return View(villaNumObj);
+                TempData["error"] = "The Villa Number Already Exists.";
             }
+            villaNumObj.VillaList = _context.Villas.ToList().Select(u => new SelectListItem
+            {
+                Text = u.Name,
+                Value = u.Id.ToString()
+            });
+            return View(villaNumObj);
+
         }
 
-        public IActionResult Update(int villaId)
+        public IActionResult Update(int villaNumberId)
         {
-            Villa? villa=_context.Villas.FirstOrDefault(v=>v.Id== villaId);
-            if(villa==null)
+            VillaNumberVM villaNumberVM = new()
+            {
+                VillaList = _context.Villas.ToList().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                }),
+                VillaNumber = _context.VillaNumbers.FirstOrDefault(u=>u.Villa_Number==villaNumberId)
+            };
+            if(villaNumberVM.VillaNumber == null)
             {
                 return RedirectToAction("Error", "Home");
             }
-            else
-            {
-                return View(villa);
-            }
+            return View(villaNumberVM);
         }
         [HttpPost]
-        public IActionResult Update(Villa villaObj)
+        public IActionResult Update(VillaNumberVM villaNumberObj)
         {
             if (ModelState.IsValid)
             {
-                _context.Villas.Update(villaObj);
+                _context.VillaNumbers.Update(villaNumberObj.VillaNumber);
                 _context.SaveChanges();
-                TempData["success"] = "The villa has been updated successfully!";
+                TempData["success"] = "The villa Number has been Updated successfully!";
                 return RedirectToAction("Index");
             }
-            else
+
+            villaNumberObj.VillaList = _context.Villas.ToList().Select(u => new SelectListItem
             {
-                return View(villaObj);
-            }
+                Text = u.Name,
+                Value = u.Id.ToString()
+            });
+            return View(villaNumberObj);
         }
 
-        public IActionResult Delete(int villaId)
+        public IActionResult Delete(int villaNumberId)
         {
-            Villa? villa = _context.Villas.FirstOrDefault(v => v.Id == villaId);
-            if (villa == null)
+            VillaNumberVM villaNumberVM = new()
+            {
+                VillaList = _context.Villas.ToList().Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                }),
+                VillaNumber = _context.VillaNumbers.FirstOrDefault(u => u.Villa_Number == villaNumberId)
+            };
+            if (villaNumberVM.VillaNumber == null)
             {
                 return RedirectToAction("Error", "Home");
             }
-            else
-            {
-                return View(villa);
-            }
+            return View(villaNumberVM);
         }
         [HttpPost]
-        public IActionResult Delete(Villa villaObj)
+        public IActionResult Delete(VillaNumberVM villaNumberObj)
         {
-            Villa? villaFromDB=_context.Villas.FirstOrDefault(v=>v.Id == villaObj.Id);
-            if (villaFromDB is not null)
+            VillaNumber? villaNumberFromDB = _context.VillaNumbers.FirstOrDefault(v => v.Villa_Number == villaNumberObj.VillaNumber.Villa_Number);
+            if (villaNumberFromDB is not null)
             {
-                _context.Villas.Remove(villaFromDB);
+                _context.VillaNumbers.Remove(villaNumberFromDB);
                 _context.SaveChanges();
-                TempData["success"] = "The villa has been deleted successfully!";
-                return RedirectToAction("Index");
+                TempData["success"] = "The villa Number has been deleted successfully!";
+                return RedirectToAction(nameof(Index));
             }
             else
             {
-                TempData["error"] = "The villa could not be deleted!";
+                TempData["error"] = "The villa Number could not be deleted!";
                 return View();
             }
         }
