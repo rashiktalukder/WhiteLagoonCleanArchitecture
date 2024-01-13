@@ -10,7 +10,7 @@ builder.Services.AddControllersWithViews();
 //in the infrastructure layer, we have added dbContext which parameter was named option; for DB connection configuring from web. and infrastructure will access DB from here...
 builder.Services.AddDbContext<ApplicationDBContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<IVillaRepository,VillaRepository>();
+builder.Services.AddScoped<IUnitOfWork,UnitOfWork>();
 
 var app = builder.Build();
 

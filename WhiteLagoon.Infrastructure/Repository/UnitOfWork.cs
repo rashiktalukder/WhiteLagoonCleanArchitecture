@@ -1,32 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using WhiteLagoon.Application.Common.Interfaces;
-using WhiteLagoon.Domain.Entities;
 using WhiteLagoon.Infrastructure.Data;
 
 namespace WhiteLagoon.Infrastructure.Repository
 {
-    public class VillaRepository : Repository<Villa>, IVillaRepository
+    public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDBContext _context;
-        public VillaRepository(ApplicationDBContext context):base(context) 
+        public IVillaRepository Villa { get; private set; }
+        public IVillaNumberRepository VillaNumber { get; private set; }
+        public UnitOfWork(ApplicationDBContext context)
         {
             _context = context;
+            Villa = new VillaRepository(_context);
+            VillaNumber = new VillaNumberRepository(_context);
         }
-
         public void Save()
         {
             _context.SaveChanges();
-        }
-
-        public void Update(Villa entity)
-        {
-            _context.Update(entity);
         }
     }
 }

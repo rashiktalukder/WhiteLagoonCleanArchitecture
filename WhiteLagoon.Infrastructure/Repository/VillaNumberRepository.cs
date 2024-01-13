@@ -11,22 +11,17 @@ using WhiteLagoon.Infrastructure.Data;
 
 namespace WhiteLagoon.Infrastructure.Repository
 {
-    public class VillaRepository : Repository<Villa>, IVillaRepository
+    public class VillaNumberRepository : Repository<VillaNumber>, IVillaNumberRepository
     {
         private readonly ApplicationDBContext _context;
-        public VillaRepository(ApplicationDBContext context):base(context) 
+        public VillaNumberRepository(ApplicationDBContext context):base(context)
         {
             _context = context;
         }
 
-        public void Save()
+        public void Update(VillaNumber entity)
         {
-            _context.SaveChanges();
-        }
-
-        public void Update(Villa entity)
-        {
-            _context.Update(entity);
+            _context.VillaNumbers.Update(entity);
         }
     }
 }
